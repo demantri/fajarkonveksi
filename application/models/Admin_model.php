@@ -10,11 +10,12 @@ class Admin_model extends CI_Model {
         }
     }
 
-	public function getJurnal()
+	public function getJurnal($start, $end)
 	{
 		$sql = "SELECT a.*, nm_akun
         FROM jurnal a
         INNER JOIN akun b ON a.no_coa = b.no_akun
+		WHERE tgl_jurnal BETWEEN '$start' AND '$end'
         ORDER BY id ASC";
         return $this->db->query($sql);
 	}

@@ -26,17 +26,37 @@ class Laporan extends CI_Controller {
 	public function jurnalumum()
 	{
 		# code...
-		$data['transaksi'] = $this->Laporan_model->data_transaksi();
-		$data['notifikasi'] = $this->Admin_model->data_notifikasi();
-		$data['pesanmasuk'] = $this->Admin_model->data_notifikasi_pesan();
-		$data['title'] = 'Laporan Transaksi';
-		$data['start'] = date('Y-m-d');
-		$data['end'] = date('Y-m-d');
-		$data['list'] = $this->Admin_model->getJurnal()->result();
+		$start = $this->input->post('start');
+		$end = $this->input->post('end');
+		if (isset($start, $end)) {
+			$periode = $start.' s/d '.$end;
+			$data['transaksi'] = $this->Laporan_model->data_transaksi();
+			$data['notifikasi'] = $this->Admin_model->data_notifikasi();
+			$data['pesanmasuk'] = $this->Admin_model->data_notifikasi_pesan();
+			$data['title'] = 'Jurnal Umum';
+			$data['start'] = date('Y-m-d');
+			$data['end'] = date('Y-m-d');
+			$data['list'] = $this->Admin_model->getJurnal($start, $end)->result();
+			$data['periode'] = $periode;
+	
+			$this->load->view('tema/admin/header', $data);
+			$this->load->view('laporan/jurnal', $data);
+			$this->load->view('tema/admin/footer');
+		} else {
+			$data['transaksi'] = $this->Laporan_model->data_transaksi();
+			$data['notifikasi'] = $this->Admin_model->data_notifikasi();
+			$data['pesanmasuk'] = $this->Admin_model->data_notifikasi_pesan();
+			$data['title'] = 'Jurnal Umum';
+			$data['start'] = date('Y-m-d');
+			$data['end'] = date('Y-m-d');
+			$data['list'] = $this->Admin_model->getJurnal($start, $end)->result();
+			$data['periode'] = '-';
 
-		$this->load->view('tema/admin/header', $data);
-		$this->load->view('laporan/jurnal', $data);
-		$this->load->view('tema/admin/footer');
+	
+			$this->load->view('tema/admin/header', $data);
+			$this->load->view('laporan/jurnal', $data);
+			$this->load->view('tema/admin/footer');
+		}
 	}
 
 	public function print_trx() {
