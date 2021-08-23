@@ -27,6 +27,17 @@ class Laporan_model extends CI_Model {
 		return $this->db->get()->result_array();
 	}
 
+	public function getBB($coa, $tgl)
+	{
+		$sql ="SELECT a.*, nm_akun, header_akun
+		FROM jurnal a
+		JOIN akun b ON a.no_coa = b.no_akun
+		WHERE no_coa = '$coa'
+		AND LEFT(tgl_jurnal, 7) = '$tgl'
+		";
+		return $this->db->query($sql);
+	}
+
 	// public function total_profit() {
 	// 	$cek = $this->data_transaksi();
 	// 	$profit = $cek['transaksi_total'];

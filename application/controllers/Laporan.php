@@ -59,6 +59,100 @@ class Laporan extends CI_Controller {
 		}
 	}
 
+	public function bukubesar()
+	{
+		$akun = $this->input->post('akun');
+		$periode = $this->input->post('periode');
+		if (isset($periode, $akun)) {
+			$tahun1 = date('Y', strtotime($periode));
+			$bulan1 = date('m', strtotime($periode));
+			$cek = date('m-d-Y', mktime(0,0,0,1, $bulan1-1, $tahun1));
+			$bulan = substr($cek, 3,2);
+			$tahun = substr($cek, 6,5);
+			$query = "SELECT sum(nominal) as debit , 
+			(
+				SELECT sum(nominal) 
+				FROM jurnal 
+				WHERE no_coa = '$akun' 
+				AND MONTH(tgl_jurnal) <= '$bulan' 
+				AND YEAR(tgl_jurnal) <= '$tahun' 
+				and posisi_dr_cr = 'k' 
+			) AS kredit 
+			FROM jurnal 
+			WHERE no_coa = '$akun' 
+			AND MONTH(tgl_jurnal) <= '$bulan' 
+			AND YEAR(tgl_jurnal) <= '$tahun' 
+			and posisi_dr_cr = 'd'
+			";
+			$saldo_awal = $this->db->query($query)->row();
+			$list = $this->Laporan_model->getBB($akun, $periode)->result();
+			$coa = $this->db->get('akun')->result();
+			
+
+			$this->db->where('no_akun', $akun);
+			$nm_akun = $this->db->get('akun')->row()->nm_akun; 
+			// print_r($nm_akun);exit;
+
+			$data = [
+				'transaksi' => $this->Laporan_model->data_transaksi(), 
+				'notifikasi' => $this->Admin_model->data_notifikasi(),
+				'pesanmasuk' => $this->Admin_model->data_notifikasi_pesan(),
+				'title' => 'Buku Besar', 
+				'saldo_awal' => $saldo_awal, 
+				'akun' => $coa, 
+				'list' => $list, 
+				'nm_akun' => $nm_akun, 
+				'no_akun' => $akun, 
+				'periode' => date('F Y', strtotime($periode))
+			];
+			$this->load->view('tema/admin/header', $data);
+			$this->load->view('laporan/bukubesar', $data);
+			$this->load->view('tema/admin/footer');
+		} else {
+			# code...
+			$tahun1 = date('Y', strtotime($periode));
+			$bulan1 = date('m', strtotime($periode));
+			$cek = date('m-d-Y', mktime(0,0,0,1, $bulan1-1, $tahun1));
+			$bulan = substr($cek, 3,2);
+			$tahun = substr($cek, 6,5);
+			$query = "SELECT sum(nominal) as debit , 
+			(
+				SELECT sum(nominal) 
+				FROM jurnal 
+				WHERE no_coa = '$akun' 
+				AND MONTH(tgl_jurnal) <= '$bulan' 
+				AND YEAR(tgl_jurnal) <= '$tahun' 
+				and posisi_dr_cr = 'k' 
+			) AS kredit 
+			FROM jurnal 
+			WHERE no_coa = '$akun' 
+			AND MONTH(tgl_jurnal) <= '$bulan' 
+			AND YEAR(tgl_jurnal) <= '$tahun' 
+			and posisi_dr_cr = 'd'
+			";
+			$saldo_awal = $this->db->query($query)->row();
+			$list = $this->Laporan_model->getBB($akun, $periode)->result();
+			$coa = $this->db->get('akun')->result();
+
+			$data = [
+				'transaksi' => $this->Laporan_model->data_transaksi(), 
+				'notifikasi' => $this->Admin_model->data_notifikasi(),
+				'pesanmasuk' => $this->Admin_model->data_notifikasi_pesan(),
+				'title' => 'Buku Besar', 
+				'saldo_awal' => $saldo_awal, 
+				'akun' => $coa, 
+				'list' => $list, 
+				'nm_akun' => '-', 
+				'no_akun' => '-', 
+				'periode' => '-'
+			];
+			$this->load->view('tema/admin/header', $data);
+			$this->load->view('laporan/bukubesar', $data);
+			$this->load->view('tema/admin/footer');
+		}
+		
+	}
+
 	public function print_trx() {
 		$data['title'] = 'Laporan Transaksi';
 		$data['start'] = $this->input->post('start');
